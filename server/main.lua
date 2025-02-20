@@ -1,106 +1,106 @@
 local sharedConfig = require 'config.shared'
 local config = require 'config.server'
+local math = lib.math
 
-local bridgeEntities = {}
+GlobalState.pBrMeta = {
+    state = false,
+    cPos = { false, false },
+}
 
-local function lerpVec(a, b, t)
-    return vec3(
-        a.x + (b.x - a.x) * t,
-        a.y + (b.y - a.y) * t,
-        a.z + (b.z - a.z) * t
-    )
-end
-
-local function moveEntity(entity, initialPosition, targetPosition, duration)
+local duration = config.bridgeSettings.movementDuration
+local function moveEntity(currentState)
     CreateThread(function()
-        local startTime = GetGameTimer()
-        while true do
-            local elapsedTime = GetGameTimer() - startTime
-            local t = math.clamp(elapsedTime / duration, 0.0, 1.0)
-            local currentPosition = lerpVec(initialPosition, targetPosition, t)
-            SetEntityCoords(entity, currentPosition.x, currentPosition.y, currentPosition.z, true, true, true, false)
-            if t >= 1.0 then break end
-            Wait(0)
+        local interpolators = {}
+        local bridgeCount = #sharedConfig.bridges
+        local positions = {}
+        local GlobalState = GlobalState
+
+        for i = 1, bridgeCount do
+            local bridge = sharedConfig.bridges[i]
+            local from = currentState and bridge.openState or bridge.normalState
+            local to = currentState and bridge.normalState or bridge.openState
+            interpolators[i] = math.lerp(from, to, duration)
         end
-    end)
-end
-
---- Toggles the state of drawbridges.
---- @param isOpening boolean If true, the bridges open; otherwise, they return to their normal state.
---- @param duration number The time (in seconds) it takes for each bridge to transition from one state to another.
-local function toggleBridges(isOpening, duration)
-    for _, bridge in ipairs(bridgeEntities) do
-        local fromState = isOpening and bridge.normalState or bridge.openState
-        local toState = isOpening and bridge.openState or bridge.normalState
-        moveEntity(bridge.ent, fromState, toState, duration)
-    end
-end
-
---- Opens the drawbridges if they are currently closed.
-local function openBridges()
-    if GlobalState.bridgesOpen then return end
-    GlobalState.bridgesOpen = true
-    toggleBridges(true, config.bridgeSettings.movementDuration)
-    SetTimeout(config.bridgeSettings.movementDuration + config.bridgeSettings.timeout, function()
-        toggleBridges(false, config.bridgeSettings.movementDuration)
-        Wait(config.bridgeSettings.movementDuration)
-        GlobalState.bridgesOpen = false
-    end)
-end
-exports('openBridges', openBridges)
-
-
-
-lib.callback.register('smoke_drawbridge:requestBridgeIds', function()
-    local bridgeIds = {}
-    for _, bridge in ipairs(bridgeEntities) do
-        bridgeIds[#bridgeIds + 1] = bridge.netId
-    end
-    return bridgeIds
-end)
-
-RegisterNetEvent('smoke_drawbridge:server:hackBridge', function()
-    if GlobalState.bridgesOpen then return end
-    local coords = GetEntityCoords(GetPlayerPed(source))
-    local distance = #(coords - sharedConfig.HackBridge.coords)
-    if not distance <= 2.5 then return end
-    openBridges()
-end)
-
-CreateThread(function()
-    Wait(5000) -- Make sure streams are loaded
-    for id, bridge in ipairs(sharedConfig.bridges) do
-        local ent = CreateObjectNoOffset(bridge.hash, bridge.normalState.x, bridge.normalState.y,
-            bridge.normalState.z, false, false, false)
-        FreezeEntityPosition(ent, true)
-        local netId = NetworkGetNetworkIdFromEntity(ent)
-        bridgeEntities[id] = {
-            ent = ent,
-            netId = netId,
-            normalState = bridge.normalState,
-            openState = bridge.openState
+        local targetState = not currentState
+        currentState = currentState or true
+        while true do
+            local allFinished = true
+            for i = 1, bridgeCount do
+                local pos, step = interpolators[i]()
+                positions[i] = pos
+                if step < 1 then
+                    allFinished = false
+                end
+            end
+            GlobalState.pBrMeta = {
+                state = currentState,
+                cPos = positions,
+            }
+            if allFinished then break end
+            Wait(500)
+        end
+        if targetState then
+            SetTimeout(config.bridgeSettings.timeout, function()
+                moveEntity(true)
+            end)
+        end
+        GlobalState.pBrMeta = {
+            state = targetState,
+            cPos = positions,
         }
-    end
-    GlobalState.bridgesOpen = false
-end)
+    end)
+end
 
-if config.enableCommands then
-    RegisterCommand('drawbridges', function()
-        openBridges()
-    end, true)
+local function openBridges()
+    local currentState = GlobalState.pBrMeta.state
+    if not currentState then
+        moveEntity(currentState)
+    end
 end
 
 ---@diagnostic disable-next-line: undefined-global
 SetInterval(function()
-    if not GlobalState.bridgesOpen and math.random(1, 100) <= config.bridgeSettings.chance then
+    if not GlobalState.pBrMeta.state and math.random(1, 100) <= config.bridgeSettings.chance then
         openBridges()
     end
 end, config.bridgeSettings.interval)
 
-AddEventHandler('onResourceStop', function(resourceName)
-    if resourceName == GetCurrentResourceName() then
-        for _, bridge in ipairs(bridgeEntities) do
-            DeleteEntity(bridge.ent)
-        end
-    end
+RegisterNetEvent('smoke_drawbridge:server:hackBridge', function()
+    local coords = GetEntityCoords(GetPlayerPed(source))
+    local distance = #(coords - sharedConfig.HackBridge.coords)
+    if distance > 3 then return end
+    openBridges()
 end)
+
+if config.enableCommands then
+    lib.addCommand('portbridges', {
+        help = 'Open or view status of bridge',
+        params = {
+            {
+                name = 'state',
+                type = 'string',
+                help = 'open / status',
+            }
+        },
+        restricted = 'group.admin'
+    }, function(source, args)
+        if args.state == 'open' then
+            openBridges()
+        elseif args.state == 'status' then
+            TriggerClientEvent('ox_lib:notify', source, {
+                title = 'Smoke Bridge',
+                description = 'The bridge is currently ' .. (GlobalState.pBrMeta.state and 'open' or 'closed'),
+                type = 'success'
+            })
+        else
+            TriggerClientEvent('ox_lib:notify', source, {
+                title = 'Smoke Bridge',
+                description = 'Invalid state',
+                type = 'error'
+            })
+        end
+    end)
+end
+
+-- Exports 
+exports('openPortBridges', openBridges)
