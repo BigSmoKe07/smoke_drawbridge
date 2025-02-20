@@ -34,35 +34,35 @@ return {
     barrierGates = {
         {
             model = `prop_bridge_barrier_gate_01x`,
-            coords = vec3(364.69915771484377, -2343.686279296875, 11.39140605926513),
-            normalRot = vec3(0.000000, -0.000000, -0.000010),
+            coords = vec3(364.69, -2343.68, 11.39),
+            normalRot = vec3(0.0, -0.0, -0.000010),
             minRotationY = 90,
             maxRotationY = -90,
             rotationX = 180
         },
         {
             model = `prop_bridge_barrier_gate_01x`,
-            coords = vec3(342.0478515625, -2343.5517578125, 11.46424674987793),
-            normalRot = vec3(0.000000, -0.000000, 179.999985),
+            coords = vec3(342.04, -2343.55, 11.46),
+            normalRot = vec3(0.0, -0.0, 180.0),
             minRotationY = -90,
             maxRotationY = 90,
             rotationX = 0
         },
         {
             model = `prop_bridge_barrier_gate_01x`,
-            coords = vec3(364.7115478515625, -2288.304443359375, 11.36281585693359),
-            normalRot = vec3(0.000000, -0.000000, -0.000010),
+            coords = vec3(364.71, -2288.3, 11.36),
+            normalRot = vec3(0.0, -0.0, -180.0),
             minRotationY = 90,
             maxRotationY = -90,
-            rotationX = 180
+            rotationX = 0
         },
         {
             model = `prop_bridge_barrier_gate_01x`,
-            coords = vec3(342.1158447265625, -2288.013671875, 11.30535125732421),
-            normalRot = vec3(0.000000, -0.000000, 179.999985),
+            coords = vec3(342.11, -2288.01, 11.30),
+            normalRot = vec3(0.0, 0.0, 0.0),
             minRotationY = -90,
             maxRotationY = 90,
-            rotationX = 0
+            rotationX = -180
         }
     }
 }
