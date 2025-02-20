@@ -35,7 +35,7 @@ return {
         {
             model = `prop_bridge_barrier_gate_01x`,
             coords = vec3(364.69, -2343.68, 11.39),
-            normalRot = vec3(0.0, -0.0, -0.000010),
+            normalRot = vec3(0.0, 0.0, 0.0),
             minRotationY = 90,
             maxRotationY = -90,
             rotationX = 180
@@ -43,15 +43,16 @@ return {
         {
             model = `prop_bridge_barrier_gate_01x`,
             coords = vec3(342.04, -2343.55, 11.46),
-            normalRot = vec3(0.0, -0.0, 180.0),
+            normalRot = vec3(0.0, 0.0, 180.0),
             minRotationY = -90,
             maxRotationY = 90,
             rotationX = 0
         },
+
         {
             model = `prop_bridge_barrier_gate_01x`,
             coords = vec3(364.71, -2288.3, 11.36),
-            normalRot = vec3(0.0, -0.0, -180.0),
+            normalRot = vec3(0.0, 0.0, -180.0),
             minRotationY = 90,
             maxRotationY = -90,
             rotationX = 0
