@@ -44,7 +44,8 @@ Controls the state of a bridge based on its index.
     - `false`: Closes the bridge (default if not specified).
 
 ### Description
-Toggles the specified bridge to the provided state. If `state` is omitted (`nil`), the bridge will default to opening (`true`).
+
+Toggles the specified bridge. Pass `true` explicitly to open; `false` or omitting `state` closes it.
 
 ### Example
 ```lua
