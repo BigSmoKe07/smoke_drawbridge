@@ -22,7 +22,35 @@ Need help or want to chat? Join our community on Discord:
 [![Discord Banner 2](https://discord.com/api/guilds/1166449313824653393/widget.png?style=banner3)](https://discord.gg/HDvgpMEKjX)
 
 ## Credits
-This mod uses bridge mods by PNWParksFan. Please support at [ParksMods Donation Page](https://parksmods.com/donate/).
+[PNWParksFan](https://parksmods.com/donate/) - bridge models
+[DemiAutomatic](https://github.com/DemiAutomatic) - major rewrite in bridge movement
 
 ## Video Credits
 [![Discord Banner 2](https://discord.com/api/guilds/1341623000579051520/widget.png?style=banner2)](https://discord.gg/U9y5DAxwH3)
+
+
+# Export Usage
+
+## `exports.smoke_drawbridge:toggleBridge(index, state)`
+
+Controls the state of a bridge based on its index.
+
+### Parameters
+- **`index`** (`integer`)
+  - The index of the bridge from the configuration (`config/shared.bridges`).
+- **`state`** (`boolean`, optional)
+  - The target state for the bridge:
+    - `true`: Opens the bridge.
+    - `false`: Closes the bridge (default if not specified).
+
+### Description
+Toggles the specified bridge to the provided state. If `state` is omitted (`nil`), the bridge will default to opening (`true`).
+
+### Example
+```lua
+-- Open bridge at index 1
+exports.smoke_drawbridge:toggleBridge(1, true)
+
+-- Close bridge at index 2
+exports.smoke_drawbridge:toggleBridge(2)
+```

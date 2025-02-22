@@ -1,80 +1,74 @@
 local sharedConfig = require 'config.shared'
 local config = require 'config.server'
 local math = lib.math
+local bridgeTimers = {}
 
-GlobalState.pBrMeta = {
-    state = false,
-    cPos = { false, false },
-}
-GlobalState.pBrCooldown = false
+CreateThread(function()
+    for i = 1, #sharedConfig.bridges do
+        GlobalState['bridges:state:' .. i] = false
+        GlobalState['bridges:cooldown:' .. i] = false
+        GlobalState['bridges:coords:' .. i] = sharedConfig.bridges[i].normalState
+    end
+end)
 
-local duration = config.bridgeSettings.movementDuration
-local function moveEntity(currentState)
-    CreateThread(function()
-        local interpolators = {}
-        local bridgeCount = #sharedConfig.bridges
-        local positions = {}
-        local GlobalState = GlobalState
+local function calculateTravelTime(currentCoords, targetCoords, index)
+    local bridge = sharedConfig.bridges[index]
+    local totalTime = bridge.movementDuration
+    local currentDistance = #(currentCoords - targetCoords)
+    local totalDistance = #(bridge.normalState - bridge.openState)
+    local mod = (totalDistance - currentDistance) / totalDistance
 
-        for i = 1, bridgeCount do
-            local bridge = sharedConfig.bridges[i]
-            local from = currentState and bridge.openState or bridge.normalState
-            local to = currentState and bridge.normalState or bridge.openState
-            interpolators[i] = math.lerp(from, to, duration)
-        end
-        local targetState = not currentState
-        currentState = currentState or true
-        while true do
-            local allFinished = true
-            for i = 1, bridgeCount do
-                local pos, step = interpolators[i]()
-                positions[i] = pos
-                if step < 1 then
-                    allFinished = false
-                end
-            end
-            GlobalState.pBrMeta = {
-                state = currentState,
-                cPos = positions,
-            }
-            if allFinished then break end
-            Wait(500)
-        end
-        if targetState then
-            SetTimeout(config.bridgeSettings.timeout, function()
-                moveEntity(true)
-            end)
-        end
-        GlobalState.pBrMeta = {
-            state = targetState,
-            cPos = positions,
-        }
-    end)
+    return totalTime - math.floor(totalTime * mod)
 end
 
-local function openBridges()
-    local currentState = GlobalState.pBrMeta.state
-    if not currentState or not GlobalState.pBrCooldown then
-        GlobalState.pBrCooldown = true
-        moveEntity(currentState)
-        SetTimeout(config.bridgeSettings.cooldown, function()
-            GlobalState.pBrCooldown = false
+local function toggleBridge(index, state)
+    CreateThread(function()
+        local bridge = sharedConfig.bridges[index]
+        local from = state and bridge.normalState or bridge.openState
+        local to = state and bridge.openState or bridge.normalState
+        local duration = calculateTravelTime(from, to, index)
+
+        if bridgeTimers[index] then
+            bridgeTimers[index]:forceEnd(false)
+        end
+
+        GlobalState['bridges:state:' .. index] = state
+        GlobalState['bridges:cooldown:' .. index] = true
+        lib.timer(config.bridgeSettings.cooldown, function()
+            GlobalState['bridges:cooldown:' .. index] = false
+        end, true)
+
+        CreateThread(function()
+            for interp in math.lerp(from, to, duration) do
+                GlobalState['bridges:coords:' .. index] = interp
+            end
+
+            bridgeTimers[index] = lib.timer(config.bridgeSettings.timeout, function()
+                toggleBridge(index, false)
+                bridgeTimers[index] = nil
+            end, true)
         end)
-    end
+    end)
 end
 
 ---@diagnostic disable-next-line: undefined-global
 SetInterval(function()
-    if not GlobalState.pBrMeta.state and math.random(1, 100) <= config.bridgeSettings.chance then
-        openBridges()
+    if math.random(1, 100) <= config.bridgeSettings.chance then
+        for index = 1, #sharedConfig.bridges do
+            if GlobalState['bridges:state:' .. index] then return end
+            toggleBridge(true, index)
+        end
     end
 end, config.bridgeSettings.interval)
 
-RegisterNetEvent('smoke_drawbridge:server:hackBridge', function()
+RegisterNetEvent('smoke_drawbridge:server:hackBridge', function(index)
+    local config = sharedConfig.bridges[index].hackBridge
+    if not config.enabled then return end
     local coords = GetEntityCoords(GetPlayerPed(source))
-    local distance = #(coords - sharedConfig.HackBridge.coords)
+    local distance = #(coords - config.coords)
     if distance > 3 then return end
-    openBridges()
+    if GlobalState['bridges:state:' .. index] then return end
+    toggleBridge(index, true)
 end)
 
 if config.enableCommands then
@@ -82,20 +76,28 @@ if config.enableCommands then
         help = 'Open or view status of bridge',
         params = {
             {
-                name = 'state',
+                name = 'action',
                 type = 'string',
-                help = 'open / status',
+                help = 'open, close or status',
             }
         },
         restricted = 'group.admin'
     }, function(source, args)
-        if args.state == 'open' then
-            openBridges()
-        elseif args.state == 'status' then
+        if args.action == 'open' then
+            for index = 1, #sharedConfig.bridges do
+                toggleBridge(index, true)
+            end
+        elseif args.action == 'close' then
+            for index = 1, #sharedConfig.bridges do
+                toggleBridge(index)
+            end
+        elseif args.action == 'status' then
+            local status = ('Vehicle Bridge: %s  \nRailway Bridge: %s'):format(GlobalState['bridges:state:1'] and 'open' or 'closed',
+                GlobalState['bridges:state:2'] and 'open' or 'closed')
             TriggerClientEvent('ox_lib:notify', source, {
                 title = 'Smoke Bridge',
-                description = 'The bridge is currently ' .. (GlobalState.pBrMeta.state and 'open' or 'closed'),
-                type = 'success'
+                description = status,
+                type = 'info'
             })
         else
             TriggerClientEvent('ox_lib:notify', source, {
@@ -108,5 +110,5 @@ if config.enableCommands then
 end
 
 lib.versionCheck('BigSmoKe07/smoke_drawbridge')
--- Exports 
-exports('openPortBridges', openBridges)
+-- Exports
+exports('toggleBridge', toggleBridge)
