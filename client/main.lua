@@ -10,6 +10,7 @@ local IsControlJustPressed = IsControlJustPressed
 local SetEntityRotation = SetEntityRotation
 local GetEntityRotation = GetEntityRotation
 
+---@param state boolean
 local function toggleBarriers(state)
     for i = 1, #sharedConfig.barrierGates do
         CreateThread(function()
@@ -28,6 +29,8 @@ local function toggleBarriers(state)
     end
 end
 
+---@param index number
+---@param state boolean
 local function toggleBlockAreas(index, state)
     if state then
         local blockAreas = sharedConfig.bridges[index].blockAreas
@@ -52,6 +55,10 @@ local function toggleBlockAreas(index, state)
     end
 end
 
+---@param currentCoords vector3
+---@param targetCoords vector3
+---@param index number
+---@return number
 local function calculateTravelTime(currentCoords, targetCoords, index)
     local bridge = sharedConfig.bridges[index]
     local totalTime = bridge.movementDuration
@@ -62,6 +69,7 @@ local function calculateTravelTime(currentCoords, targetCoords, index)
     return totalTime - math.floor(totalTime * mod)
 end
 
+---@param index number
 local function openBridge(index)
     local bridge = sharedConfig.bridges[index]
     local entity = bridgeEntities[index]
@@ -85,6 +93,7 @@ local function openBridge(index)
     bridgeStates[index] = false
 end
 
+---@param index number
 local function closeBridge(index)
     local bridge = sharedConfig.bridges[index]
     local entity = bridgeEntities[index]
@@ -105,6 +114,7 @@ local function closeBridge(index)
     bridgeStates[index] = false
 end
 
+---@param index number
 local function spawnBridge(index)
     local bridge = sharedConfig.bridges[index]
     local model = bridge.hash
@@ -124,12 +134,15 @@ local function spawnBridge(index)
     end
 end
 
+---@param index number
 local function destroyBridge(index)
     if DoesEntityExist(bridgeEntities[index]) then
         DeleteEntity(bridgeEntities[index])
     end
+
     toggleBarriers(false)
     toggleBlockAreas(index, false)
+
     bridgeEntities[index] = nil
     bridgeStates[index] = false
 end
@@ -157,6 +170,7 @@ local function hackBridge(config, index)
 	RemoveAnimDict('mp_common_heist')
 end
 
+---@param index number
 local function createInteraction(index)
     local config = sharedConfig.bridges[index].hackBridge
     local type = config.interact

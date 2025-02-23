@@ -11,6 +11,10 @@ CreateThread(function()
     end
 end)
 
+---@param currentCoords vector3
+---@param targetCoords vector3
+---@param index number
+---@return number
 local function calculateTravelTime(currentCoords, targetCoords, index)
     local bridge = sharedConfig.bridges[index]
     local totalTime = bridge.movementDuration
@@ -21,6 +25,8 @@ local function calculateTravelTime(currentCoords, targetCoords, index)
     return totalTime - math.floor(totalTime * mod)
 end
 
+---@param index number
+---@param state boolean
 local function toggleBridge(index, state)
     CreateThread(function()
         local bridge = sharedConfig.bridges[index]
