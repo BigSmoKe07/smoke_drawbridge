@@ -28,6 +28,7 @@ dependencies {
 
 files {
     'config/*.lua',
+    'shared/utils.lua'
 }
 
 data_file 'DLC_ITYP_REQUEST' 'stream/drawbridge.ytyp'

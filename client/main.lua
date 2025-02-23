@@ -1,5 +1,5 @@
 local sharedConfig = require 'config.shared'
-local math = lib.math
+local Utils = require 'shared.utils'
 local bridgeEntities = {}
 local speedZones = {}
 local bridgeStates = {}
@@ -55,20 +55,6 @@ local function toggleBlockAreas(index, state)
     end
 end
 
----@param currentCoords vector3
----@param targetCoords vector3
----@param index number
----@return number
-local function calculateTravelTime(currentCoords, targetCoords, index)
-    local bridge = sharedConfig.bridges[index]
-    local totalTime = bridge.movementDuration
-    local currentDistance = #(currentCoords - targetCoords)
-    local totalDistance = #(bridge.normalState - bridge.openState)
-    local mod = (totalDistance - currentDistance) / totalDistance
-
-    return totalTime - math.floor(totalTime * mod)
-end
-
 ---@param index number
 local function openBridge(index)
     local bridge = sharedConfig.bridges[index]
@@ -81,7 +67,7 @@ local function openBridge(index)
     bridgeStates[index] = true
 
     local currentCoords = GetEntityCoords(entity)
-    local timeNeeded = calculateTravelTime(currentCoords, bridge.openState, index)
+    local timeNeeded = Utils.CalculateTravelTime(currentCoords, bridge.openState, index)
 
     toggleBarriers(true)
     toggleBlockAreas(index, true)
@@ -101,7 +87,7 @@ local function closeBridge(index)
     if not DoesEntityExist(entity) then return end
 
     local currentCoords = GetEntityCoords(entity)
-    local timeNeeded = calculateTravelTime(currentCoords, bridge.normalState, index)
+    local timeNeeded = Utils.CalculateTravelTime(currentCoords, bridge.normalState, index)
 
     bridgeStates[index] = true
 

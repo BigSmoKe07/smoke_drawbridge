@@ -1,5 +1,6 @@
 local sharedConfig = require 'config.shared'
 local config = require 'config.server'
+local Utils = require 'shared.utils'
 local math = lib.math
 local bridgeTimers = {}
 
@@ -11,20 +12,6 @@ CreateThread(function()
     end
 end)
 
----@param currentCoords vector3
----@param targetCoords vector3
----@param index number
----@return number
-local function calculateTravelTime(currentCoords, targetCoords, index)
-    local bridge = sharedConfig.bridges[index]
-    local totalTime = bridge.movementDuration
-    local currentDistance = #(currentCoords - targetCoords)
-    local totalDistance = #(bridge.normalState - bridge.openState)
-    local mod = (totalDistance - currentDistance) / totalDistance
-
-    return totalTime - math.floor(totalTime * mod)
-end
-
 ---@param index number
 ---@param state boolean
 local function toggleBridge(index, state)
@@ -32,7 +19,7 @@ local function toggleBridge(index, state)
         local bridge = sharedConfig.bridges[index]
         local from = state and bridge.normalState or bridge.openState
         local to = state and bridge.openState or bridge.normalState
-        local duration = calculateTravelTime(from, to, index)
+        local duration = Utils.CalculateTravelTime(from, to, index)
 
         if bridgeTimers[index] then
             bridgeTimers[index]:forceEnd(false)
