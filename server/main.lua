@@ -68,12 +68,13 @@ RegisterNetEvent('smoke_drawbridge:server:hackBridge', function(index)
     local distance = #(coords - config.coords)
     if distance > 3 then return end
     if GlobalState['bridges:state:' .. index] then return end
+
     toggleBridge(index, true)
 end)
 
 if config.enableCommands then
     lib.addCommand('portbridges', {
-        help = 'Open or view status of bridge',
+        help = locale('command_help'),
         params = {
             {
                 name = 'action',
@@ -92,19 +93,10 @@ if config.enableCommands then
                 toggleBridge(index)
             end
         elseif args.action == 'status' then
-            local status = ('Vehicle Bridge: %s  \nRailway Bridge: %s'):format(GlobalState['bridges:state:1'] and 'open' or 'closed',
-                GlobalState['bridges:state:2'] and 'open' or 'closed')
-            TriggerClientEvent('ox_lib:notify', source, {
-                title = 'Smoke Bridge',
-                description = status,
-                type = 'info'
-            })
+            local status = locale('status', GlobalState['bridges:state:1'] and locale('open') or locale('closed'), GlobalState['bridges:state:2'] and locale('open') or locale('closed'))
+            lib.notify(source, { type = 'info', description = status })
         else
-            TriggerClientEvent('ox_lib:notify', source, {
-                title = 'Smoke Bridge',
-                description = 'Invalid state',
-                type = 'error'
-            })
+            lib.notify(source, { type = 'error', description = locale('invalid_state') })
         end
     end)
 end
