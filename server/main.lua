@@ -27,9 +27,6 @@ local function toggleBridge(index, state)
 
         GlobalState['bridges:state:' .. index] = state
         GlobalState['bridges:cooldown:' .. index] = true
-        lib.timer(config.bridgeSettings.cooldown, function()
-            GlobalState['bridges:cooldown:' .. index] = false
-        end, true)
 
         CreateThread(function()
             for interp in math.lerp(from, to, duration) do
@@ -38,6 +35,9 @@ local function toggleBridge(index, state)
 
             bridgeTimers[index] = lib.timer(config.bridgeSettings.timeout, function()
                 toggleBridge(index, false)
+                lib.timer(config.bridgeSettings.cooldown, function()
+                    GlobalState['bridges:cooldown:' .. index] = false
+                end, true)
                 bridgeTimers[index] = nil
             end, true)
         end)
