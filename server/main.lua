@@ -49,7 +49,7 @@ SetInterval(function()
     if math.random(1, 100) <= config.bridgeSettings.chance then
         for index = 1, #sharedConfig.bridges do
             if GlobalState['bridges:state:' .. index] then return end
-            toggleBridge(true, index)
+            toggleBridge(index, true)
         end
     end
 end, config.bridgeSettings.interval)
@@ -96,7 +96,7 @@ if config.enableCommands then
             end
         elseif args.action == 'close' then
             for index = 1, #sharedConfig.bridges do
-                toggleBridge(index)
+                toggleBridge(index, false)
             end
         elseif args.action == 'status' then
             local status = ('Vehicle Bridge: %s  \nRailway Bridge: %s'):format(GlobalState['bridges:state:1'] and 'open' or 'closed',
