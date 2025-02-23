@@ -109,11 +109,7 @@ local function spawnBridge(index)
     local bridge = sharedConfig.bridges[index]
     local model = bridge.hash
 
-    RequestModel(model)
-    while not HasModelLoaded(model) do
-        RequestModel(model)
-        Wait(100)
-    end
+    lib.requestModel(model)
 
     local pos = GlobalState['bridges:coords:' .. index]
     local ent = CreateObjectNoOffset(model, pos.x, pos.y, pos.z, false, false, false)
