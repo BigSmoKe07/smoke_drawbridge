@@ -12,6 +12,7 @@ This combination map and script adds fully operational vertical-lift capabilitie
 ### Dependencies
 - [onesync](https://docs.fivem.net/docs/scripting-reference/onesync/)
 - [ox_lib](https://github.com/overextended/ox_lib/releases)
+- [ox_inventory](https://github.com/overextended/ox_inventory/releases) *(Optional dependency for item-based hacking)*
 
 ### Installation
 Not much hassle, just drag and drop into your server's resources folder.
@@ -23,6 +24,7 @@ Need help or want to chat? Join our community on Discord:
 
 ## Credits
 [PNWParksFan](https://parksmods.com/donate/) - bridge models
+
 [DemiAutomatic](https://github.com/DemiAutomatic) - major rewrite in bridge movement
 
 ## Video Credits
