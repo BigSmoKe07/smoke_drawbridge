@@ -149,7 +149,7 @@ local function hackBridge(config, index)
     if config.minigame() then
         TriggerServerEvent('smoke_drawbridge:server:hackBridge', index)
     else
-        lib.notify({ type = 'error', description = 'You failed to hack the bridge control.' })
+        lib.notify({ type = 'error', description = locale('failed_hack_bridge') })
     end
 
 	StopEntityAnim(cache.ped, 'pick_door', 'mp_common_heist', 0)

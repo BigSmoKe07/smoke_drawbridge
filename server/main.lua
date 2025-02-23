@@ -73,7 +73,7 @@ lib.callback.register('smoke_drawbridge:server:removeItem', function(source, ind
 
     local success = exports.ox_inventory:RemoveItem(source, item.name, 1)
     if not success then
-        lib.notify(source, { type = 'error', description = 'You do not have the required item to hack the bridge.' })
+        lib.notify(source, { type = 'error', description = locale('missing_item') })
     end
 
     return success
@@ -86,7 +86,7 @@ if config.enableCommands then
             {
                 name = 'action',
                 type = 'string',
-                help = 'open, close or status',
+                help = locale('command_help'),
             }
         },
         restricted = 'group.admin'
