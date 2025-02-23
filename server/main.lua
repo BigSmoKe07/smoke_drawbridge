@@ -1,5 +1,6 @@
 local sharedConfig = require 'config.shared'
 local config = require 'config.server'
+local utils = require 'shared.utils'
 local math = lib.math
 local bridgeTimers = {}
 
@@ -11,22 +12,14 @@ CreateThread(function()
     end
 end)
 
-local function calculateTravelTime(currentCoords, targetCoords, index)
-    local bridge = sharedConfig.bridges[index]
-    local totalTime = bridge.movementDuration
-    local currentDistance = #(currentCoords - targetCoords)
-    local totalDistance = #(bridge.normalState - bridge.openState)
-    local mod = (totalDistance - currentDistance) / totalDistance
-
-    return totalTime - math.floor(totalTime * mod)
-end
-
+---@param index number
+---@param state boolean
 local function toggleBridge(index, state)
     CreateThread(function()
         local bridge = sharedConfig.bridges[index]
         local from = state and bridge.normalState or bridge.openState
         local to = state and bridge.openState or bridge.normalState
-        local duration = calculateTravelTime(from, to, index)
+        local duration = utils.calculateTravelTime(from, to, index)
 
         if bridgeTimers[index] then
             bridgeTimers[index]:forceEnd(false)
@@ -56,7 +49,7 @@ SetInterval(function()
     if math.random(1, 100) <= config.bridgeSettings.chance then
         for index = 1, #sharedConfig.bridges do
             if GlobalState['bridges:state:' .. index] then return end
-            toggleBridge(true, index)
+            toggleBridge(index, true)
         end
     end
 end, config.bridgeSettings.interval)
@@ -72,6 +65,20 @@ RegisterNetEvent('smoke_drawbridge:server:hackBridge', function(index)
     toggleBridge(index, true)
 end)
 
+lib.callback.register('smoke_drawbridge:server:removeItem', function(source, index)
+    local item = sharedConfig.bridges[index].hackBridge.item
+    if not item?.removeItem then
+        return false
+    end
+
+    local success = exports.ox_inventory:RemoveItem(source, item.name, 1)
+    if not success then
+        lib.notify(source, { type = 'error', description = locale('missing_item') })
+    end
+
+    return success
+end)
+
 if config.enableCommands then
     lib.addCommand('portbridges', {
         help = locale('command_help'),
@@ -79,7 +86,7 @@ if config.enableCommands then
             {
                 name = 'action',
                 type = 'string',
-                help = 'open, close or status',
+                help = locale('command_help'),
             }
         },
         restricted = 'group.admin'
@@ -90,7 +97,7 @@ if config.enableCommands then
             end
         elseif args.action == 'close' then
             for index = 1, #sharedConfig.bridges do
-                toggleBridge(index)
+                toggleBridge(index, false)
             end
         elseif args.action == 'status' then
             local status = locale('status', GlobalState['bridges:state:1'] and locale('open') or locale('closed'), GlobalState['bridges:state:2'] and locale('open') or locale('closed'))

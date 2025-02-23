@@ -1,5 +1,7 @@
 {
   "hack_bridge": "Hack Bridge",
+  "failed_hack_bridge": "You failed to hack the bridge control.",
+  "missing_item": "You are missing the required item to hack the bridge control.",
   "invalid_state": "You have entered an invalid state.",
   "status": "Vehicle Bridge: %s  \nRailway Bridge: %s",
   "open": "open",

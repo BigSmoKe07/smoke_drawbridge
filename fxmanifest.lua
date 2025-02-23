@@ -28,6 +28,7 @@ dependencies {
 
 files {
     'config/*.lua',
+    'shared/utils.lua',
     'locales/*.json'
 }
 

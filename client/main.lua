@@ -1,5 +1,5 @@
 local sharedConfig = require 'config.shared'
-local math = lib.math
+local utils = require 'shared.utils'
 local bridgeEntities = {}
 local speedZones = {}
 local bridgeStates = {}
@@ -10,6 +10,7 @@ local IsControlJustPressed = IsControlJustPressed
 local SetEntityRotation = SetEntityRotation
 local GetEntityRotation = GetEntityRotation
 
+---@param state boolean
 local function toggleBarriers(state)
     for i = 1, #sharedConfig.barrierGates do
         CreateThread(function()
@@ -28,6 +29,8 @@ local function toggleBarriers(state)
     end
 end
 
+---@param index number
+---@param state boolean
 local function toggleBlockAreas(index, state)
     if state then
         local blockAreas = sharedConfig.bridges[index].blockAreas
@@ -52,16 +55,7 @@ local function toggleBlockAreas(index, state)
     end
 end
 
-local function calculateTravelTime(currentCoords, targetCoords, index)
-    local bridge = sharedConfig.bridges[index]
-    local totalTime = bridge.movementDuration
-    local currentDistance = #(currentCoords - targetCoords)
-    local totalDistance = #(bridge.normalState - bridge.openState)
-    local mod = (totalDistance - currentDistance) / totalDistance
-
-    return totalTime - math.floor(totalTime * mod)
-end
-
+---@param index number
 local function openBridge(index)
     local bridge = sharedConfig.bridges[index]
     local entity = bridgeEntities[index]
@@ -73,7 +67,7 @@ local function openBridge(index)
     bridgeStates[index] = true
 
     local currentCoords = GetEntityCoords(entity)
-    local timeNeeded = calculateTravelTime(currentCoords, bridge.openState, index)
+    local timeNeeded = utils.calculateTravelTime(currentCoords, bridge.openState, index)
 
     toggleBarriers(true)
     toggleBlockAreas(index, true)
@@ -85,6 +79,7 @@ local function openBridge(index)
     bridgeStates[index] = false
 end
 
+---@param index number
 local function closeBridge(index)
     local bridge = sharedConfig.bridges[index]
     local entity = bridgeEntities[index]
@@ -92,7 +87,7 @@ local function closeBridge(index)
     if not DoesEntityExist(entity) then return end
 
     local currentCoords = GetEntityCoords(entity)
-    local timeNeeded = calculateTravelTime(currentCoords, bridge.normalState, index)
+    local timeNeeded = utils.calculateTravelTime(currentCoords, bridge.normalState, index)
 
     bridgeStates[index] = true
 
@@ -105,15 +100,12 @@ local function closeBridge(index)
     bridgeStates[index] = false
 end
 
+---@param index number
 local function spawnBridge(index)
     local bridge = sharedConfig.bridges[index]
     local model = bridge.hash
 
-    RequestModel(model)
-    while not HasModelLoaded(model) do
-        RequestModel(model)
-        Wait(100)
-    end
+    lib.requestModel(model)
 
     local pos = GlobalState['bridges:coords:' .. index]
     local ent = CreateObjectNoOffset(model, pos.x, pos.y, pos.z, false, false, false)
@@ -128,16 +120,43 @@ local function spawnBridge(index)
     end
 end
 
+---@param index number
 local function destroyBridge(index)
     if DoesEntityExist(bridgeEntities[index]) then
         DeleteEntity(bridgeEntities[index])
     end
+
     toggleBarriers(false)
     toggleBlockAreas(index, false)
+
     bridgeEntities[index] = nil
     bridgeStates[index] = false
 end
 
+---@param config table
+---@param index number
+local function hackBridge(config, index)
+    if config.item?.name and config.item?.removeItem then
+        local success = lib.callback.await('smoke_drawbridge:server:removeItem', 200, index)
+        if not success then return end
+    end
+
+	TaskTurnPedToFaceCoord(cache.ped, config.coords.x, config.coords.y, config.coords.z, 4000)
+	Wait(500)
+
+    lib.playAnim(cache.ped, 'mp_common_heist', 'pick_door', 8.0, -8.0, -1, 1)
+
+    if config.minigame() then
+        TriggerServerEvent('smoke_drawbridge:server:hackBridge', index)
+    else
+        lib.notify({ type = 'error', description = locale('failed_hack_bridge') })
+    end
+
+	StopEntityAnim(cache.ped, 'pick_door', 'mp_common_heist', 0)
+	RemoveAnimDict('mp_common_heist')
+end
+
+---@param index number
 local function createInteraction(index)
     local config = sharedConfig.bridges[index].hackBridge
     local type = config.interact
@@ -152,9 +171,7 @@ local function createInteraction(index)
 
             lib.showTextUI(('[E] - %s'):format(locale('hack_bridge')))
             if IsControlJustPressed(0, 38) then
-                if config.minigame() then
-                    TriggerServerEvent('smoke_drawbridge:server:hackBridge', index)
-                end
+                hackBridge(config, index)
             end
         end
 
@@ -173,10 +190,9 @@ local function createInteraction(index)
                 canInteract = function()
                     return not GlobalState['bridges:cooldown:' .. index]
                 end,
+                items = config.item?.name or nil,
                 onSelect = function()
-                    if config.minigame() then
-                        TriggerServerEvent('smoke_drawbridge:server:hackBridge', index)
-                    end
+                    hackBridge(config, index)
                 end
             }
         })
