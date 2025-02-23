@@ -22,6 +22,10 @@ return {
                 interact = 'ox_target', -- 'ox_target' or 'textUI' uses ox_lib
                 coords = vec3(366.15, -2346.95, 10.6),
                 radius = 0.6,
+                item = { -- optional item
+                    name = 'hackingdevice',
+                    remove = true
+                },
                 minigame = function()
                     return lib.skillCheck({{areaSize = 20, speedMultiplier = 0.1}, {areaSize = 10, speedMultiplier = 0.1}, {areaSize = 25, speedMultiplier = 0.1}})
                 end
@@ -37,6 +41,10 @@ return {
                 interact = 'ox_target', -- 'ox_target' or 'textUI' uses ox_lib
                 coords = vec3(211.6990, -2347.2209, 69.1732),
                 radius = 0.6,
+                item = { -- optional item
+                    name = 'hackingdevice',
+                    remove = false
+                },
                 minigame = function()
                     return lib.skillCheck({{areaSize = 20, speedMultiplier = 0.1}, {areaSize = 10, speedMultiplier = 0.1}, {areaSize = 25, speedMultiplier = 0.1}})
                 end

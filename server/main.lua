@@ -71,6 +71,20 @@ RegisterNetEvent('smoke_drawbridge:server:hackBridge', function(index)
     toggleBridge(index, true)
 end)
 
+lib.callback.register('smoke_drawbridge:server:removeItem', function(source, index)
+    local item = sharedConfig.bridges[index].hackBridge.item
+    if not item?.removeItem then
+        return false
+    end
+
+    local success = exports.ox_inventory:RemoveItem(source, item.name, 1)
+    if not success then
+        lib.notify(source, { type = 'error', description = 'You do not have the required item to hack the bridge.' })
+    end
+
+    return success
+end)
+
 if config.enableCommands then
     lib.addCommand('portbridges', {
         help = 'Open or view status of bridge',

@@ -141,6 +141,11 @@ end
 ---@param config table
 ---@param index number
 local function hackBridge(config, index)
+    if config.item?.name and config.item?.removeItem then
+        local success = lib.callback.await('smoke_drawbridge:server:removeItem', 200, index)
+        if not success then return end
+    end
+
 	TaskTurnPedToFaceCoord(cache.ped, config.coords.x, config.coords.y, config.coords.z, 4000)
 	Wait(500)
 
@@ -189,6 +194,7 @@ local function createInteraction(index)
                 canInteract = function()
                     return not GlobalState['bridges:cooldown:' .. index]
                 end,
+                items = config.item?.name or nil,
                 onSelect = function()
                     hackBridge(config, index)
                 end
