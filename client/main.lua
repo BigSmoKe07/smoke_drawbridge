@@ -169,7 +169,7 @@ local function createInteraction(index)
         function interact:nearby()
             if GlobalState['bridges:cooldown:' .. index] then return end
 
-            lib.showTextUI('[E] - Hack Bridge Control')
+            lib.showTextUI(('[E] - %s'):format(locale('hack_bridge')))
             if IsControlJustPressed(0, 38) then
                 hackBridge(config, index)
             end
@@ -184,8 +184,8 @@ local function createInteraction(index)
             coords = config.coords,
             radius = config.radius,
             options = {
-                label = 'Hack Bridge Control',
-                icon = 'fas fa-code-branch',
+                label = locale('hack_bridge'),
+                icon = 'fa-solid fa-code-branch',
                 distance = 2.5,
                 canInteract = function()
                     return not GlobalState['bridges:cooldown:' .. index]

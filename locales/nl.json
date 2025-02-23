@@ -1,0 +1,8 @@
+{
+    "hack_bridge": "Brug Hacken",
+    "invalid_state": "Je hebt een ongeldige staat ingevoerd.",
+    "status": "Voertuig Brug: %s  \nTrein Brug: %s",
+    "open": "open",
+    "closed": "gesloten",
+    "command_help": "Open of bekijk de status van de brug."
+}

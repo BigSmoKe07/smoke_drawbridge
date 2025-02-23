@@ -1,0 +1,8 @@
+{
+  "hack_bridge": "Hack Bridge",
+  "invalid_state": "You have entered an invalid state.",
+  "status": "Vehicle Bridge: %s  \nRailway Bridge: %s",
+  "open": "open",
+  "closed": "closed",
+  "command_help": "Open or view status of bridge."
+}

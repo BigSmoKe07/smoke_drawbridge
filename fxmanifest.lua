@@ -28,8 +28,13 @@ dependencies {
 
 files {
     'config/*.lua',
-    'shared/utils.lua'
+    'shared/utils.lua',
+    'locales/*.json'
 }
 
 data_file 'DLC_ITYP_REQUEST' 'stream/drawbridge.ytyp'
 data_file 'DLC_ITYP_REQUEST' 'stream/nodes368.ynd'
+
+ox_libs {
+    'locale'
+}
