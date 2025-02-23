@@ -138,6 +138,22 @@ local function destroyBridge(index)
     bridgeStates[index] = false
 end
 
+---@param config table
+---@param index number
+local function hackBridge(config, index)
+	TaskTurnPedToFaceCoord(cache.ped, config.coords.x, config.coords.y, config.coords.z, 4000)
+	Wait(500)
+
+    lib.playAnim(cache.ped, 'mp_common_heist', 'pick_door', 8.0, -8.0, -1, 1)
+
+    if config.minigame() then
+        TriggerServerEvent('smoke_drawbridge:server:hackBridge', index)
+    end
+
+	StopEntityAnim(cache.ped, 'pick_door', 'mp_common_heist', 0)
+	RemoveAnimDict('mp_common_heist')
+end
+
 local function createInteraction(index)
     local config = sharedConfig.bridges[index].hackBridge
     local type = config.interact
@@ -152,9 +168,7 @@ local function createInteraction(index)
 
             lib.showTextUI('[E] - Hack Bridge Control')
             if IsControlJustPressed(0, 38) then
-                if config.minigame() then
-                    TriggerServerEvent('smoke_drawbridge:server:hackBridge', index)
-                end
+                hackBridge(config, index)
             end
         end
 
@@ -174,9 +188,7 @@ local function createInteraction(index)
                     return not GlobalState['bridges:cooldown:' .. index]
                 end,
                 onSelect = function()
-                    if config.minigame() then
-                        TriggerServerEvent('smoke_drawbridge:server:hackBridge', index)
-                    end
+                    hackBridge(config, index)
                 end
             }
         })
