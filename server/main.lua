@@ -1,6 +1,6 @@
 local sharedConfig = require 'config.shared'
 local config = require 'config.server'
-local Utils = require 'shared.utils'
+local utils = require 'shared.utils'
 local math = lib.math
 local bridgeTimers = {}
 
@@ -19,7 +19,7 @@ local function toggleBridge(index, state)
         local bridge = sharedConfig.bridges[index]
         local from = state and bridge.normalState or bridge.openState
         local to = state and bridge.openState or bridge.normalState
-        local duration = Utils.CalculateTravelTime(from, to, index)
+        local duration = utils.calculateTravelTime(from, to, index)
 
         if bridgeTimers[index] then
             bridgeTimers[index]:forceEnd(false)

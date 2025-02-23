@@ -1,12 +1,12 @@
 local sharedConfig = require 'config.shared'
 
-local Utils = {}
+local utils = {}
 
 ---@param currentCoords vector3
 ---@param targetCoords vector3
 ---@param index number
 ---@return number
-function Utils.CalculateTravelTime(currentCoords, targetCoords, index)
+function utils.calculateTravelTime(currentCoords, targetCoords, index)
     local bridge = sharedConfig.bridges[index]
     local totalTime = bridge.movementDuration
     local currentDistance = #(currentCoords - targetCoords)
@@ -16,4 +16,4 @@ function Utils.CalculateTravelTime(currentCoords, targetCoords, index)
     return totalTime - math.floor(totalTime * mod)
 end
 
-return Utils
+return utils

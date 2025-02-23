@@ -1,5 +1,5 @@
 local sharedConfig = require 'config.shared'
-local Utils = require 'shared.utils'
+local utils = require 'shared.utils'
 local bridgeEntities = {}
 local speedZones = {}
 local bridgeStates = {}
@@ -67,7 +67,7 @@ local function openBridge(index)
     bridgeStates[index] = true
 
     local currentCoords = GetEntityCoords(entity)
-    local timeNeeded = Utils.CalculateTravelTime(currentCoords, bridge.openState, index)
+    local timeNeeded = utils.calculateTravelTime(currentCoords, bridge.openState, index)
 
     toggleBarriers(true)
     toggleBlockAreas(index, true)
@@ -87,7 +87,7 @@ local function closeBridge(index)
     if not DoesEntityExist(entity) then return end
 
     local currentCoords = GetEntityCoords(entity)
-    local timeNeeded = Utils.CalculateTravelTime(currentCoords, bridge.normalState, index)
+    local timeNeeded = utils.calculateTravelTime(currentCoords, bridge.normalState, index)
 
     bridgeStates[index] = true
 
