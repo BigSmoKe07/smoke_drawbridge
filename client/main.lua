@@ -73,6 +73,9 @@ local function openBridge(index)
     toggleBlockAreas(index, true)
 
     for interpolated in lib.math.lerp(GetEntityCoords(entity), bridge.openState, timeNeeded) do
+        if not DoesEntityExist(entity) then
+            break
+        end
         SetEntityCoordsNoOffset(entity, interpolated.x, interpolated.y, interpolated.z, false, false, false)
     end
 
@@ -102,6 +105,7 @@ end
 
 ---@param index number
 local function spawnBridge(index)
+    CreateThread(function()
     local bridge = sharedConfig.bridges[index]
     local model = bridge.hash
 
@@ -118,6 +122,7 @@ local function spawnBridge(index)
     else
         closeBridge(index)
     end
+    end)
 end
 
 ---@param index number
