@@ -165,6 +165,7 @@ end
 local function createInteraction(index)
     local config = sharedConfig.bridges[index].hackBridge
     local type = config.interact
+    
     if type == 'textUI' then
         local interact = lib.points.new({
             coords = config.coords,
@@ -201,8 +202,33 @@ local function createInteraction(index)
                 end
             }
         })
+    elseif type == 'qb-target' then
+        exports['qb-target']:AddBoxZone('bridge:interact' .. index, config.coords, 1.0, 1.0, {
+            name = 'bridge:interact' .. index,
+            heading = 0,
+            debugPoly = false,
+            minZ = config.coords.z - 1,
+            maxZ = config.coords.z + 1
+        }, {
+            options = {
+                {
+                    type = 'client',
+                    event = '',
+                    icon = 'fas fa-code-branch',
+                    label = locale('hack_bridge'),
+                    canInteract = function()
+                        return not GlobalState['bridges:cooldown:' .. index]
+                    end,
+                    action = function()
+                        hackBridge(config, index)
+                    end
+                }
+            },
+            distance = 2.5
+        })
     end
 end
+
 
 CreateThread(function()
     for i = 1, #sharedConfig.bridges do
