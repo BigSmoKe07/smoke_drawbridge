@@ -3,7 +3,7 @@
 This combination map and script adds fully operational vertical-lift capabilities for the vehicle and rail draw bridges near the Port of Los Santos. 
 
 ## Preview
-[![preview](https://cdn.discordapp.com/attachments/1048474430319370260/1341721971674710057/SSSS.jpg?ex=67c2e4f6&is=67c19376&hm=fe3cc1d3d19118844dc002ddf259962ed7fb452505f23e43e9c48a4fe77a5cf6&)](https://youtu.be/F9RSTJJ-MkA?si=BhVEXrFCTQivnxY-)
+[![preview](https://r2.fivemanage.com/XMCfCRidUHgGkyCuAga9N/image/smoke_drawbridge.jpg)](https://youtu.be/F9RSTJJ-MkA?si=BhVEXrFCTQivnxY-)
 ### Features
 - Bridge prop is server-synced for all players 
 - Dynamically triggers at intervals
