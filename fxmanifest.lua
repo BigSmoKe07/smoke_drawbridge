@@ -6,7 +6,7 @@ this_is_a_map 'yes'
 
 name 'smoke_drawbridge'
 repository 'https://github.com/BigSmoKe07/smoke_drawbridge'
-version '1.3.2'
+version '1.3.3'
 author 'BigSmoKe07'
 
 shared_scripts {
