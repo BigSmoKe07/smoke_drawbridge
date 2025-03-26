@@ -7,5 +7,5 @@ return {
         chance = 20,                      -- Chance to open the bridge every interval (100)
         cooldown = 20 * minutes,           -- Cooldown for opening the bridge   
     },
-    enableCommands = true,               --  /drawbridges
+    enableCommands = true,               --  /portbridges
 }
